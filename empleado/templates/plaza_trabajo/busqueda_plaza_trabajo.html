@@ -1,0 +1,114 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Busqueda de plaza de trabajo</title>
+<script src="{% static "js/jquery-3.2.1.min.js" %}"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCPaiexTFpH0gyf82f_0Wt50YG6abNZdAw"></script>
+
+<script type="text/javascript" >
+	var markers = [];
+	var map;
+	var circle; 
+	
+	function getCookie(name) {
+	    var cookieValue = null;
+	    if (document.cookie && document.cookie != '') {
+	        var cookies = document.cookie.split(';');
+	        for (var i = 0; i < cookies.length; i++) {
+	            var cookie = jQuery.trim(cookies[i]);
+	            // Does this cookie string begin with the name we want?
+	            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                break;
+	            }
+	        }
+	    }
+	    return cookieValue;
+	}
+	
+	
+	
+	
+	function initialize() {
+		/*CREACION DEL MAPA*/
+		var mapOptions = {
+		    zoom: 7,
+		    center: new google.maps.LatLng(-2.314480, -78.356614),
+		    streetViewControl:false,
+		    zoomControl: true,
+		    zoomControlOptions: {
+		      style: google.maps.ZoomControlStyle.SMALL
+		    }
+		  };
+		  var map = new google.maps.Map(document.getElementById('map'),mapOptions);
+		  /*EVENTO DE CLICK PARA COLOCAR EL MARCADOR SOBRE EL LUGAR*/
+		 function placeCircle(location) {
+		 		
+		 		//$("#id_latitud").val(location.lat());
+		 		//$("#id_longitud").val(location.lng());
+		 		
+			 	var optionsCircle = {
+				      strokeColor: 'blue',
+				      strokeOpacity: 0.1,
+				      strokeWeight: 2,
+				      fillColor: 'blue',
+				      fillOpacity: 0.35,
+				      map: map,
+				      center: location,
+				      radius: 2000,
+				      clickable : false
+			    };
+			    if (circle) circle.setMap(null);
+			    circle = new google.maps.Circle(optionsCircle);		
+			    
+			    getPlazasTrabajo(location, 3000)
+
+		}
+		  
+		  
+		  
+		 function getPlazasTrabajo(coordenada, radio){
+			 
+			 	for (var i = 0; i < markers.length; i++) {
+		          markers[i].setMap(null);
+		        }
+			 	markers = [];
+			 
+		      	$.ajaxSetup({
+		            headers: { "X-CSRFToken": getCookie("csrftoken") }
+		        });
+		      	$.ajax({
+		    	  method: "POST",
+		    	  url: "{% url 'buscar_plaza_trabajo'  %}",
+		    	  data: { lat: coordenada.lat(), lng:coordenada.lng(), radio:3000/1000}
+		    	}).done(function( respuesta ) {
+		    		$.each(respuesta, function( index, value ){
+		    			var punto = new google.maps.LatLng(value.lat, value.lng);
+		    			var myMarker = new google.maps.Marker({
+						      position: punto,
+						      map: map,
+						      title:value.nombre
+			        	});
+		    			markers.push(myMarker);
+		    		});
+		      	});
+			}
+		  
+		  
+		  
+		  
+		  if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+			 google.maps.event.addListener(map, "click",function(event){placeCircle(event.latLng);});
+		  }else{
+		  	 google.maps.event.addListener(map, "rightclick",function(event){placeCircle(event.latLng);});
+		  }
+		  
+	}
+	google.maps.event.addDomListener(window, 'load', initialize);
+</script>	
+
+	<div id="map" class="map rounded" style="height: 500px;"  ></div>
+</body>
+</html>

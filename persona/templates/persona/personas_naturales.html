@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Personas Naturales</title>
+</head>
+<body>
+	<form action="">
+		Consulta: <input type="text" name="query" value="{{query}}" />
+		<input type="submit" value="Consultar"  />
+	</form>
+	<br/>
+
+
+		<table border="1">
+			{% for persona in personas_naturales %}
+				<tr>
+					<td>{{ persona.id }}</td>
+					<td>{{ persona.nombres }}</td>
+					<td>{{ persona.apellido_paterno }}</td>
+					<td>{{ persona.persona.get_tipo_display }}</td>
+					<td>{{ persona.persona.observaciones }}</td>
+				</tr>
+			{% endfor %}	
+		</table>
+			
+		{% if personas_naturales.has_previous %}
+		<a href="?page={{personas_naturales.previous_page_number}}&query={{ query }}">Anterior</a>
+		{% endif %}
+		
+		Página {{ personas_naturales.number }} de {{ personas_naturales.paginator.num_pages }}
+		
+		{% if personas_naturales.has_next %}
+		<a href="?page={{personas_naturales.next_page_number}}&query={{ query }}">Siguiente</a>
+		{% endif %}
+
+	
+
+</body>
+</html>

@@ -1,0 +1,37 @@
+{% load i18n %} 
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>{% trans "Listado de empleados" %}</title>
+</head>
+<body>
+		<h1>{% trans "Listado de empleados" %}</h1>
+		
+		{% if msg %}
+			<h2 style="color: blue">{{ msg }}</h2>
+		{% endif %}
+		
+		<table border="1">
+			{% for empleado in empleados %}
+				<tr>
+					<td>{{ empleado.id }}</td>
+					<td>{{ empleado.persona.nombres }}</td>
+					<td>{{ empleado.persona.apellido_paterno }}</td>
+					<td>{{ empleado.persona.get_sexo_display }}</td>
+					<td>{{ empleado.observaciones }}</td>
+					<td><img src="{{ MEDIA_URL }}{{ empleado.foto }}" /></td>
+					<td>{% for plaza in empleado.plazas_trabajo.all %}
+							{{ plaza }}<br/>
+						{% endfor %}				
+					</td>
+					<td>{{ empleado.get_estado_display }}</td>
+					<td><a href="{% url 'empleado' empleado.id %}">Modificar</a></td>
+					<td><a href="{% url 'eliminar_empleado' empleado.id %}">Eliminar</a></td>
+				</tr>
+			{% endfor %}	
+		</table>
+			
+
+</body>
+</html>
